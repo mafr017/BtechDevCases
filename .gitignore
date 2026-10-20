@@ -1,0 +1,35 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userprefs
+
+# Test results & coverage
+TestResults/
+coverage/
+*.trx
+*.coverage
+coverage*.xml
+
+# NuGet
+*.nupkg
+.nuget/packages/
+
+# IDEs
+.idea/
+.vs/
+.vscode/
+*.swp
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# OS
+.DS_Store
+Thumbs.db
