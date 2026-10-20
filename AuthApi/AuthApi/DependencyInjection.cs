@@ -39,7 +39,6 @@ public static class DependencyInjection
             .Configure<IOptions<JwtOptions>>((bearer, jwtOptions) =>
             {
                 var jwt = jwtOptions.Value;
-                // Keep claim names as they appear in the token ("sub", "email") instead of the long ClaimTypes URIs.
                 bearer.MapInboundClaims = false;
                 bearer.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -50,7 +49,6 @@ public static class DependencyInjection
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = jwt.GetSigningKey(),
                     ValidateLifetime = true,
-                    // Default skew is 5 minutes, which would stretch the 15-minute inactivity limit to 20.
                     ClockSkew = TimeSpan.Zero,
                     NameClaimType = JwtRegisteredClaimNames.Email,
                 };

@@ -1,0 +1,32 @@
+@host = http://localhost:8000
+@email = budi@example.com
+@password = Passw0rd123
+@accesstoken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoLXdlYiIsImlzcyI6ImF1dGgtYXBpIiwiZXhwIjoxNzkyNTE2ODgzLCJpYXQiOjE3OTI1MTU5ODMsIm5iZiI6MTc5MjUxNTk4Mywic3ViIjoiMDFhMTVhMTQtOTgxNi03MGVkLTk1ZWEtYjY0YWVjOGIzMTBkIiwiZW1haWwiOiJtYWRpdHlhZnJAZ21haWwuY29tIiwianRpIjoiMTFlM2YwN2QtMWY0OC00OWExLTk1N2QtN2YwODcxYTdkYTQwIn0.Ihk3qAV1oG-VJGBuQJuBfJfWKIyrY6RsyLiIYWC9854
+
+### Register
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}"
+}
+
+### Login
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Protected endpoint
+GET {{host}}/api/me
+Authorization: Bearer {{accesstoken}}
+
+### Refresh token (sliding 15-minute expiration)
+POST {{host}}/api/auth/refresh
+Authorization: Bearer {{accesstoken}}
