@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-authdb}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./AuthApi
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      Database__Host: db
+      Database__Port: 5432
+      Database__Name: ${POSTGRES_DB:-authdb}
+      Database__Username: ${POSTGRES_USER:-app}
+      Database__Password: ${POSTGRES_PASSWORD:-app}
+      Jwt__Secret: ${Jwt__Secret:?Jwt__Secret must be set in .env (min 32 chars)}
+      Jwt__Issuer: ${Jwt__Issuer:-auth-api}
+      Jwt__Audience: ${Jwt__Audience:-auth-web}
+      Jwt__AccessTokenMinutes: ${Jwt__AccessTokenMinutes:-15}
+      Cors__AllowedOrigins__0: ${CORS_ORIGIN:-http://localhost:8080}
+    ports:
+      - "8000:8080"
+
+volumes:
+  pgdata:
