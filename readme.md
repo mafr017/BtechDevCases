@@ -1,62 +1,71 @@
-# Take-home Assignment: Auth with JWT (TypeScript)
+# Auth with JWT — ASP.NET Core + React + PostgreSQL
 
-Build a small application in **TypeScript/Go/C#** that supports user **registration** and **login** using **JWT**.
-You can choose any stack or structure you want.
-As long as the core auth flow works end-to-end, it’s accepted.
+Register, log in, and open a protected page that shows `Hello [email], welcome back`.
+Users are logged out after 15 minutes of inactivity.
 
----
+**Stack:** .NET 10 Web API, PostgreSQL 17, React + Vite + TypeScript, Docker Compose, xUnit.
 
-## Requirements
+## How to build and run
 
-### 1. Register
+Requirements: Docker with Docker Compose.
 
-- Fields: `email`, `password`, `confirmPassword`
-
-### 2. Login
-
-- Input: `email`, `password`
-- Return: **JWT**
-- Token should contain at least:
-
-  - `email`
-  - `user id` or similar identifier
-
-### 3. Authenticated View / Endpoint
-
-After successful login, calling the protected route / loading the protected screen should show:
-
-```
-Hello [email], welcome back
+```bash
+cp .env.example .env
 ```
 
-user should be logged out after 15 minutes of inacitvity
+Set `Jwt__Secret` in `.env` (at least 32 characters), for example with the output of:
 
----
+```bash
+openssl rand -base64 48
+```
 
-## What to deliver
+Build and start everything:
 
-- Fork this repository and then send the link
-- A runnable project (any structure).
-- README explaining:
+```bash
+docker compose up --build
+```
 
-  - How to build and run it (prepare docker compose)
-  - Required environment variables
+| Service | URL |
+|---|---|
+| Web app | http://localhost:8080 |
+| API + Swagger UI | http://localhost:8000/swagger |
+| PostgreSQL | `localhost:5433` |
 
----
+The database schema is created from `db/init/*.sql` on the first start. To reset the database: `docker compose down -v`.
 
-## Acceptance criteria
+## Environment variables
 
-- Registration works with validation.
-- Login returns a usable JWT.
-- A protected route or screen shows the welcome message using JWT auth.
+`docker-compose.yml` reads them from `.env`. Empty values use the default.
 
----
+| Variable | Default | Required | Purpose |
+|---|---|---|---|
+| `Jwt__Secret` | — | **yes** | Key used to sign the JWT (min 32 characters) |
+| `Jwt__Issuer` | `auth-api` | | `iss` claim, validated on every request |
+| `Jwt__Audience` | `auth-web` | | `aud` claim, validated on every request |
+| `Jwt__AccessTokenMinutes` | `15` | | Token lifetime, which is also the inactivity limit |
+| `POSTGRES_USER` | `app` | | Database user (used by the database and the API) |
+| `POSTGRES_PASSWORD` | `app` | | Database password (used by the database and the API) |
+| `POSTGRES_DB` | `authdb` | | Database name (used by the database and the API) |
+| `CORS_ORIGIN` | `http://localhost:8080` | | Web app origin allowed to call the API |
 
-## Optional bonus
+The API refuses to start if a required value is missing or invalid, such as a secret shorter than 32 characters.
 
-- Docker
-- Backend built using Go (or their frameworks)
-- Frontend built using React/Vue (or their frameworks)
-- Tests (unit or integration)
+### API
 
-This keeps the scope tight: just registration, login, and a protected “Hello [email]” flow.
+| Method | Path | Auth | Result |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | — | `201 { id, email }` |
+| `POST` | `/api/auth/login` | — | `200 { accessToken, tokenType, expiresAt, expiresIn }` |
+| `POST` | `/api/auth/refresh` | Bearer | New token for a still-valid token |
+| `GET` | `/api/me` | Bearer | `{ userId, email, message: "Hello [email], welcome back" }` |
+
+Sample requests are in [`AuthApi/AuthApi/AuthApi.http`](AuthApi/AuthApi/AuthApi.http).
+
+
+## Tests
+
+```bash
+cd AuthApi && dotnet test
+```
+
+Unit tests cover the registration validation rules and the JWT (user id and email claims, expiry, signature).
