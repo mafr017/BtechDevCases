@@ -8,5 +8,7 @@ public class User
 
     public string PasswordHash { get; set; } = null!;
 
+    public decimal Balance { get; set; }
+
     public DateTime CreatedAt { get; set; }
 }

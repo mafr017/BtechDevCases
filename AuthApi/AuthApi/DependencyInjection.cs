@@ -62,6 +62,8 @@ public static class DependencyInjection
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletService, WalletService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 

@@ -4,8 +4,6 @@ import { clearSession, getSession, refresh } from './api'
 const ACTIVITY_EVENTS = ['click', 'keydown', 'mousemove', 'scroll'] as const
 const CHECK_INTERVAL_MS = 30_000
 
-// While the user is active the token is refreshed (sliding 15-minute window).
-// With no activity nothing refreshes it, so it expires and the user is logged out.
 export function useSessionKeepAlive(onExpired: () => void) {
   useEffect(() => {
     let active = false
@@ -23,7 +21,9 @@ export function useSessionKeepAlive(onExpired: () => void) {
       }
       if (active) {
         active = false
-        refresh().catch(() => {}) // a 401 already cleared the session; the next tick logs out
+        refresh().catch(() => {
+          active = true
+        })
       }
     }, CHECK_INTERVAL_MS)
 
